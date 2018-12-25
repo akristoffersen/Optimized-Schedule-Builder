@@ -3,7 +3,9 @@ This scrapes the important info for the classes one imports
 
 
 inputs, name of the class as list ['name', 'number']
-outputs: [num (int), 
+outputs: 
+        list of lists:
+          [num (int), 
           type (str), 
           class # (int), 
           time (str), 
@@ -11,7 +13,7 @@ outputs: [num (int),
           Instructor (str),
           Date (str),
           waitlist (int),
-          final exam time (str)]
+          final exam time (str) (may be none if final exam was stated in an earlier num)]
 '''
 
 import os
@@ -55,10 +57,16 @@ def getinfo(name, number):
 
 
 def formatting(lst):
-    try:
-        for i in [0, 2, 7]:
-            lst[i] = int(lst[i])
-        lst = lst[:9]
-    except:
+    formatted = []
+    #tries to make anything it can into an integer
+    for i in range(len(lst)):
+        try:
+            formatted.append(int(lst[i]))
+        except:
+            formatted.append(lst[i])
+    #   either if lst is empty or nothing in the list can be integerized, then it is an invalid input
+    #   and we return an empty list.
+    if formatted == lst:
         return []
-    return lst
+    # grouping
+    return [formatted[i:i+9] for i in range(0, len(formatted), 9) if formatted[i]]
