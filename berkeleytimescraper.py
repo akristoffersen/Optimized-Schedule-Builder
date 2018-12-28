@@ -1,25 +1,22 @@
 '''
 This scrapes the important info for the classes one imports
 
-
 inputs, name of the class as list ['name', 'number']
 outputs: 
         list of lists:
           [num (int), 
           type (str), 
           class # (int), 
-          time (str), 
-          location (str),
+          time [[days], start, end], #start and end in minutes, days int 1-7 for the days of the week
+          location [building, room],
           Instructor (str),
           Date (str),
           waitlist (int),
-          final exam time (str) (may be none if final exam was stated in an earlier num)]
+          final exam time [[day], start, end] (may be none if final exam was stated in an earlier num)]
 '''
 
 import os
 import time
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
@@ -28,12 +25,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
-
-
 baseurl = 'https://www.berkeleytime.com/catalog/'
 def getinfo(name, number):
     #first make the url
-    url = baseurl + name + '/' + number
+    url = baseurl + name + '/' + str(number)
     
     ### from cs50finalproject, Matt Kristoffersen 2018
     chrome_options = Options()
@@ -55,7 +50,6 @@ def getinfo(name, number):
     driver.quit()
     return formatting(finish)
 
-
 def formatting(lst):
     formatted = []
     #tries to make anything it can into an integer
@@ -68,5 +62,49 @@ def formatting(lst):
     #   and we return an empty list.
     if formatted == lst:
         return []
-    # grouping
-    return [formatted[i:i+9] for i in range(0, len(formatted), 9) if formatted[i]]
+    #   grouping
+    formatted = [formatted[i:i+9] for i in range(0, len(formatted), 9) if formatted[i]]
+    #   Formatting times
+    for i in range(len(formatted)):
+        #class time
+        formatted[i][3] = time_formatter(formatted[i][3])
+        
+        #location:
+        if formatted[i][4] == 'OFF CAMPUS':
+            formatted[i][4] == []
+        else:
+            formatted[i][4] = formatted[i][4].split()
+        
+        #Final exam time:
+        if formatted[i][8]:
+            formatted[i][8] = time_formatter(formatted[i][8])
+    
+    return formatted
+        
+def time_formatter(raw):
+    days = {'M': [1], 'Tu': [2], 'W': [3], 'Th': [4], 'F': [5], 'S': [6], 'Su': [7], 'MWF': [1, 3, 5]}
+    time_raw = raw.split()
+    time = []
+    time.append(days[time_raw[0]])
+
+    #helper function
+    def helper(raw, afternoon=False):
+        if ':' in raw:
+            minutes = 60 * int(raw[:raw.index(':')]) + int(raw[raw.index(':')+1:])
+        else:
+            minutes = 60 * int(raw)
+        if afternoon:
+            return minutes + (12 * 60)
+        return minutes
+    
+    if time_raw[2] == 'PM':
+        time.append(helper(time_raw[1], True))
+        time.append(helper(time_raw[4], True))
+    else:
+        time.append(helper(time_raw[1]))
+        if time_raw[5] == 'PM':
+            time.append(helper(time_raw[4], True))
+        else:
+            time.append(helper(time_raw[4]))
+    
+    return time
