@@ -93,7 +93,7 @@ def time_formatter(raw):
             minutes = 60 * int(raw[:raw.index(':')]) + int(raw[raw.index(':')+1:])
         else:
             minutes = 60 * int(raw)
-        if afternoon:
+        if afternoon and minutes < 720:
             return minutes + (12 * 60)
         return minutes
     
