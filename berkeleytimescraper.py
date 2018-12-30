@@ -71,9 +71,12 @@ def formatting(lst):
         
         #location:
         if formatted[i][4] == 'OFF CAMPUS':
-            formatted[i][4] == []
+            formatted[i][4] = ['OFF CAMPUS']
+        elif formatted[i][4] == 'None' or not formatted[i][4]:
+            formatted[i][4] = []
         else:
-            formatted[i][4] = formatted[i][4].split()
+            split_list = formatted[i][4].split()
+            formatted[i][4] = [' '.join(split_list[:-1]), split_list[-1]]
         
         #Final exam time:
         if formatted[i][8]:
