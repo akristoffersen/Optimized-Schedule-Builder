@@ -25,3 +25,17 @@ class Class:
         self.enrolled = info[5]
         #waitlisted
         self.waitlist = info[6]
+
+class Schedule:
+    courseload = []
+
+    def __init__(self, *courses):
+        for course in courses:
+            self.courseload.append(course)
+    
+    def addcourse(self, course):
+        assert isinstance(course, Course), "Must be a Course instance."
+        self.courseload.append(course)
+    
+    def removecourse(self, ind):
+        return self.courseload.pop(ind)
