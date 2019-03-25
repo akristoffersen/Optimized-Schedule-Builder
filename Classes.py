@@ -27,15 +27,13 @@ class Class:
         self.waitlist = info[6]
 
 class Schedule:
-    courseload = []
 
-    def __init__(self, *courses):
-        for course in courses:
-            self.courseload.append(course)
+    def __init__(self, courses):
+        self.courseload = {(course.name, course.number), course for course in courses}
     
     def addcourse(self, course):
         assert isinstance(course, Course), "Must be a Course instance."
-        self.courseload.append(course)
+        self.courseload[(course.name, course.number)] = course
     
-    def removecourse(self, ind):
-        return self.courseload.pop(ind)
+    def removecourse(self, c): #c is a tuple of strings, ("name", "number")
+        self.courseload.pop(c, None) 
